@@ -1,0 +1,41 @@
+Resources:
+  Aliases:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${opt:stage, 'dev'}-aliases
+      AttributeDefinitions:
+        # Level 0
+        - AttributeName: aliasID
+          AttributeType: S
+        #- AttributeName: private
+        #  AttributeType: BOOL
+        #- AttributeName: name
+        #  AttributeType: S
+        #- AttributeName: image
+        #  AttributeType: S
+        #- AttributeName: publicEncryptionKey
+        #  AttributeType: B
+        #- AttributeName: updated
+        #  AttributeType: N
+        #
+        ## Level 1
+        #- AttributeName: versionToken
+        #  AttributeType: S
+        #- AttributeName: data
+        #  AttributeType: B
+        #  
+        ## Level 2
+        #- AttributeName: discoverable
+        #  AttributeType: BOOL
+        #- AttributeName: updatedPrivate
+        #  AttributeType: N
+        
+        # Level 3
+        #- AttributeName: aliasAccessTokens
+        #  AttributeType: SS
+      KeySchema:
+        - AttributeName: aliasID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableLimits.${opt:stage, self:provider.stage}.read}
+        WriteCapacityUnits: ${self:custom.tableLimits.${opt:stage, self:provider.stage}.write}
