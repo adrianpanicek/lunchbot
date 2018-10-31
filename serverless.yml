@@ -22,7 +22,12 @@ provider:
   runtime: nodejs8.10
   stage: dev
   region: eu-west-1
-  memorySize: 128
+  memorySize: 512
+  environment:
+    TOKEN_SECRET: mysecret # Only for the dev environment
+    TOKEN_EXPIRATION: 7d
+    TABLE_ALIASES: ${opt:stage, 'dev'}-aliases
+    TABLE_USERS: ${opt:stage, 'dev'}-users
   iamRoleStatements:
   - Effect: "Allow"
     Action:
@@ -35,35 +40,32 @@ provider:
       - dynamodb:DeleteItem
     Resource:
       - "Fn::GetAtt": [ Aliases, Arn ]
+      - "Fn::GetAtt": [ Users, Arn ]
 
 app: alias
 tenant: adrianpanicek
-
-# you can overwrite defaults here
-
-
-# you can add statements to the Lambda function's IAM Role here
-
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
 
 plugins:
   - serverless-webpack
 
 functions:
+  login:
+    handler: src/user.login
+    events:
+      - http:
+          path: login
+          method: post
+  authorize:
+    handler: src/user.authorize
+  register:
+    handler: src/user.register
+    events:
+      - http:
+          path: register
+          method: post
+
   get_aliases:
-    handler: src/model/alias.get
+    handler: src/alias.get
     events:
       - http:
           path: aliases
@@ -72,6 +74,16 @@ functions:
             parameters:
               querystrings:
                 aliasName: true
+  add_access_token:
+    handler: src/alias.addAccessToken
+    events:
+      - http:
+          path: /aliases/{id}/accessTokens
+          method: POST
+          request:
+            parameters:
+              paths:
+                id: true
 
 custom:
   tableLimits:
@@ -82,37 +94,3 @@ custom:
 resources:
   # DynamoDB
   - ${file(config/resources/dynamodb-tables.yml)}
-
-
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
-
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
