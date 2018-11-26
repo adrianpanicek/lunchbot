@@ -1,7 +1,6 @@
 'use strict';
 
 import { DynamoDB } from 'aws-sdk';
-import * as util from 'util';
 import * as crypto from 'crypto';
 
 const dynamo = new DynamoDB.DocumentClient();

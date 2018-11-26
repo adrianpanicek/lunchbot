@@ -1,22 +1,4 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: alias-app
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
-
 provider:
   name: aws
   runtime: nodejs8.10
@@ -28,6 +10,7 @@ provider:
     TOKEN_EXPIRATION: 7d
     TABLE_ALIASES: ${opt:stage, 'dev'}-aliases
     TABLE_USERS: ${opt:stage, 'dev'}-users
+    TABLE_REFRESH_TOKENS: ${opt:stage, 'dev'}-refresh-tokens
   iamRoleStatements:
   - Effect: "Allow"
     Action:
@@ -41,6 +24,7 @@ provider:
     Resource:
       - "Fn::GetAtt": [ Aliases, Arn ]
       - "Fn::GetAtt": [ Users, Arn ]
+      - "Fn::GetAtt": [ RefreshTokens, Arn ]
 
 app: alias
 tenant: adrianpanicek
@@ -50,19 +34,23 @@ plugins:
 
 functions:
   login:
-    handler: src/user.login
+    handler: src/user/login.credentials
     events:
-      - http:
-          path: login
-          method: post
-  authorize:
-    handler: src/user.authorize
+    - http:
+        path: login
+        method: post
+  refresh_token:
+    handler: src/user/login.withRefreshToken
+    events:
+    - http:
+        path: refreshToken
+        method: post
   register:
-    handler: src/user.register
+    handler: src/user/register.register
     events:
-      - http:
-          path: register
-          method: post
+    - http:
+        path: register
+        method: post
 
   get_aliases:
     handler: src/alias.get
@@ -93,4 +81,4 @@ custom:
 
 resources:
   # DynamoDB
-  - ${file(config/resources/dynamodb-tables.yml)}
+  - ${file(resources/dynamodb-tables.yml)}

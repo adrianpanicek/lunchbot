@@ -17,12 +17,25 @@ Resources:
     Properties:
       TableName: ${env:TABLE_USERS, self:provider.environment.TABLE_USERS}
       AttributeDefinitions:
-      - AttributeName: userID
+      - AttributeName: email
         AttributeType: S
 
       KeySchema:
-      - AttributeName: userID
+      - AttributeName: email
         KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableLimits.${opt:stage, self:provider.stage}.read}
         WriteCapacityUnits: ${self:custom.tableLimits.${opt:stage, self:provider.stage}.write}
+  RefreshTokens:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${env:TABLE_REFRESH_TOKENS, self:provider.environment.TABLE_REFRESH_TOKENS}
+      AttributeDefinitions:
+      - AttributeName: token
+        AttributeType: S
+      KeySchema:
+      - AttributeName: token
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
