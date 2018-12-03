@@ -17,11 +17,11 @@ Resources:
     Properties:
       TableName: ${env:TABLE_USERS, self:provider.environment.TABLE_USERS}
       AttributeDefinitions:
-      - AttributeName: email
+      - AttributeName: identificator
         AttributeType: S
 
       KeySchema:
-      - AttributeName: email
+      - AttributeName: identificator
         KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableLimits.${opt:stage, self:provider.stage}.read}

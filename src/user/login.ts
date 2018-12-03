@@ -1,9 +1,9 @@
 'use strict';
-import * as jwt from 'jsonwebtoken';
 import {randomString, response, responseSuccess} from "../util";
 import { DynamoDB } from 'aws-sdk';
 import * as bcrypt from 'bcryptjs';
-import {AuthUser, RefreshToken} from "./model";
+import {AuthUser, RefreshToken, filterForToken} from "./model";
+import {sign} from "./token";
 
 const db = new DynamoDB.DocumentClient();
 const refreshTokenLength = 32;
@@ -11,49 +11,41 @@ const {TABLE_USERS, TABLE_REFRESH_TOKENS, TOKEN_SECRET, TOKEN_EXPIRATION} = proc
 
 console.log("Enviroment variables parsed");
 
-async function getUserFromEmail(email: string): Promise<AuthUser> {
-    console.log('Fetching database for user ' + email);
+export async function getUserFromIdentificator(identificator: string): Promise<AuthUser> {
+    console.log('Fetching database for user ' + identificator);
 
     const {Item: user} = await db.get({
         TableName: TABLE_USERS,
-        Key: {email},
+        Key: {identificator},
         ConsistentRead: false
     }).promise();
 
     return user as AuthUser;
 }
 
-async function registerRefreshToken(token: string, user: AuthUser): Promise<RefreshToken> {
-    const {email} = user;
-    console.log('Registering new refresh token for ' + email);
+async function registerRefreshToken(token: string, {identificator}: AuthUser): Promise<RefreshToken> {
+    console.log('Registering new refresh token for ' + identificator);
 
-    const {Attributes: savedToken} = await db.put({
+    const Item = {
+        token,
+        user_id: identificator
+    } as RefreshToken;
+
+    await db.put({
         TableName: TABLE_REFRESH_TOKENS,
-        Item: {
-            token,
-            email
-        },
+        Item,
         ReturnValues: "ALL_OLD"
     }).promise();
 
-    console.log(JSON.stringify(savedToken))
+    console.log(JSON.stringify(Item))
 
-    return savedToken as RefreshToken;
+    return Item;
 }
 
-async function getRefreshToken(token: string): Promise<RefreshToken> {
-    const {Item: dbToken} = await db.get({
-        TableName: TABLE_REFRESH_TOKENS,
-        Key: {token}
-    }).promise();
-
-    return dbToken as RefreshToken;
-}
-
-export async function credentials(event) {
+export async function handle(event) {
     const {email, password} = JSON.parse(event.body)
 
-    const user: AuthUser = await getUserFromEmail(email);
+    const user: AuthUser = await getUserFromIdentificator(email);
 
     if (!user) {
         return response({
@@ -73,28 +65,6 @@ export async function credentials(event) {
 
     return responseSuccess({
         refreshToken,
-        token: jwt.sign({email}, TOKEN_SECRET, {
-            expiresIn: TOKEN_EXPIRATION
-        })
-    });
-}
-
-export async function withRefreshToken(event, context) {
-    const {refreshToken} = JSON.parse(event.body);
-
-    const savedToken: RefreshToken = await getRefreshToken(refreshToken);
-    if (!savedToken) {
-        return response({
-            code: 403,
-            message: "Bad credentials"
-        }, 403);
-    }
-
-    const {email} = refreshToken;
-
-    return responseSuccess({
-        token: jwt.sign({email}, TOKEN_SECRET, {
-            expiresIn: TOKEN_EXPIRATION
-        })
+        token: sign(user)
     });
 }

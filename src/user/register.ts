@@ -5,7 +5,7 @@ import {AuthUser} from "./model";
 
 const db = new DynamoDB.DocumentClient();
 
-const {TABLE_USERS, TOKEN_SECRET} = process.env;
+const {TABLE_USERS} = process.env;
 
 export async function register(event) {
     const {email, password} = JSON.parse(event.body);
@@ -13,7 +13,7 @@ export async function register(event) {
     const salt = await bcrypt.genSalt();
 
     const user: AuthUser = {
-        email,
+        identificator: email,
         salt,
         password: await bcrypt.hash(password, salt),
         refreshTokens: []
@@ -27,10 +27,11 @@ export async function register(event) {
             ReturnValues: "ALL_OLD"
         }).promise();
     } catch(err) {
+        console.log(JSON.stringify(err));
         return response({
             code: 409,
             message: "User with that email already exists"
-        });
+        }, 409);
     }
 
     return responseCreated({});

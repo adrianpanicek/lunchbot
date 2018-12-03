@@ -9,7 +9,7 @@ provider:
     TOKEN_SECRET: mysecret # Only for the dev environment
     TOKEN_EXPIRATION: 7d
     TABLE_ALIASES: ${opt:stage, 'dev'}-aliases
-    TABLE_USERS: ${opt:stage, 'dev'}-users
+    TABLE_USERS: ${opt:stage, 'dev'}-users-2
     TABLE_REFRESH_TOKENS: ${opt:stage, 'dev'}-refresh-tokens
   iamRoleStatements:
   - Effect: "Allow"
@@ -31,16 +31,17 @@ tenant: adrianpanicek
 
 plugins:
   - serverless-webpack
+  - serverless-domain-manager
 
 functions:
   login:
-    handler: src/user/login.credentials
+    handler: src/user/login.handle
     events:
     - http:
         path: login
         method: post
   refresh_token:
-    handler: src/user/login.withRefreshToken
+    handler: src/user/refresh_token.handle
     events:
     - http:
         path: refreshToken
@@ -51,29 +52,52 @@ functions:
     - http:
         path: register
         method: post
+  update_stash:
+    handler: src/user/update_stash.handle
+    events:
+    - http:
+        path: user/stash
+        method: put
+        authorizer: authorizer
 
-  get_aliases:
-    handler: src/alias.get
+  authorizer:
+    handler: src/authorize.handle
+
+  get_alias:
+    handler: src/alias/get_alias.handle
     events:
       - http:
-          path: aliases
+          path: aliases/{aliasID}
           method: get
+          authorizer: authorizer
           request:
             parameters:
-              querystrings:
-                aliasName: true
+              paths:
+                aliasID: true
+  create_alias:
+    handler: src/alias/create_alias.handle
+    events:
+    - http:
+        path: aliases
+        method: post
+        authorizer: authorizer
   add_access_token:
-    handler: src/alias.addAccessToken
+    handler: src/alias/create_access_token.handle
     events:
       - http:
-          path: /aliases/{id}/accessTokens
+          path: /aliases/{aliasID}/accessTokens
           method: POST
           request:
             parameters:
               paths:
-                id: true
+                aliasID: true
 
 custom:
+  customDomain:
+    domainName: alias.panicek.com
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
   tableLimits:
     dev:
       read: 1
