@@ -2,15 +2,16 @@ service: alias-app
 provider:
   name: aws
   runtime: nodejs8.10
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: eu-west-1
   memorySize: 512
   environment:
     TOKEN_SECRET: mysecret # Only for the dev environment
     TOKEN_EXPIRATION: 7d
-    TABLE_ALIASES: ${opt:stage, 'dev'}-aliases
-    TABLE_USERS: ${opt:stage, 'dev'}-users-2
-    TABLE_REFRESH_TOKENS: ${opt:stage, 'dev'}-refresh-tokens
+    TABLE_ALIASES: ${self:provider.stage}-aliases
+    TABLE_USERS: ${self:provider.stage}-users-2
+    TABLE_REFRESH_TOKENS: ${self:provider.stage}-refresh-tokens
+    TABLE_STASHES: ${self:provider.stage}-stashes
   iamRoleStatements:
   - Effect: "Allow"
     Action:
@@ -25,6 +26,7 @@ provider:
       - "Fn::GetAtt": [ Aliases, Arn ]
       - "Fn::GetAtt": [ Users, Arn ]
       - "Fn::GetAtt": [ RefreshTokens, Arn ]
+      - "Fn::GetAtt": [ Stashes, Arn ]
 
 app: alias
 tenant: adrianpanicek
@@ -52,12 +54,20 @@ functions:
     - http:
         path: register
         method: post
+
   update_stash:
-    handler: src/user/update_stash.handle
+    handler: src/stash/update_stash.handle
     events:
     - http:
         path: user/stash
         method: put
+        authorizer: authorizer
+  get_stash:
+    handler: src/stash/get_stash.handle
+    events:
+    - http:
+        path: user/stash
+        method: get
         authorizer: authorizer
 
   authorizer:

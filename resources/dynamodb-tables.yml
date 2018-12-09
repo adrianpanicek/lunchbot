@@ -39,3 +39,16 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
+  Stashes:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${env:TABLE_STASHES, self:provider.environment.TABLE_STASHES}
+      AttributeDefinitions:
+      - AttributeName: userID
+        AttributeType: S
+      KeySchema:
+      - AttributeName: userID
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
