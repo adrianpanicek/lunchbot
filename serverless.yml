@@ -101,6 +101,8 @@ functions:
             parameters:
               paths:
                 aliasID: true
+  test:
+    handler: src/index.handle
 
 custom:
   customDomain:

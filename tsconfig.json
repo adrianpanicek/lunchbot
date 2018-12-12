@@ -5,6 +5,7 @@
       "lib": [
         "ES2015"
       ],
+      "allowJs": true,
       "moduleResolution": "node"
     },
     "exclude": [
