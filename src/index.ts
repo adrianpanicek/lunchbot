@@ -1,28 +1,22 @@
-import {Application, action} from '../framework/index';
+import {Application} from '../framework/index';
 import {router} from "./router";
 
-const app = new Application;
+import {jsonify} from './middleware/jsonify';
+import {decode} from './middleware/decode';
+import {proxyFormat} from './middleware/proxyFormat';
 
-app.use(async (req, next) => await next({...req})); // clean middleware
-app.use(async (req, next) => {
-    console.log('before', req);
-    req.test = 1;
-    return await next({...req});
-}); // before middleware
+export const handle = async (event, context) => {
+    const app = new Application;
 
-app.use(action((req) => {
-    return {some: 'shit'};
-})); // action
+    app.use(decode);
+    app.use(proxyFormat);
+    app.use(jsonify);
 
-app.use(async (req, next) => {
-    let res = await next({...req});
-    console.log('after', req)
-    res.response = 1;
-    return res;
-}); // after middleware
-
-export const handle = (event, context) => {
-    console.log(event, context);
-    router(event);
-    app.run(event).then(console.log);
+    const action = router(event, context);
+    app.use(action);
+    try {
+        return await app.run(event);
+    } catch (e) {
+        console.error(e);
+    }
 }
