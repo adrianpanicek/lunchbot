@@ -21,7 +21,7 @@ app.use(async (req, next) => {
     return res;
 }); // after middleware
 
-export const handler = (event, context) => {
+export const handle = (event, context) => {
     console.log(event, context);
     router(event);
     app.run(event).then(console.log);
