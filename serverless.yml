@@ -13,6 +13,7 @@ provider:
     TABLE_USERS: ${self:provider.stage}-users-2
     TABLE_REFRESH_TOKENS: ${self:provider.stage}-refresh-tokens
     TABLE_STASHES: ${self:provider.stage}-stashes
+    FUNCTIONS: ${self:functions}
   iamRoleStatements:
   - Effect: "Allow"
     Action:
@@ -103,13 +104,12 @@ functions:
             parameters:
               paths:
                 aliasID: true
-  test:
-    name: ${self:provider.environment.TABLE_PREFIX}test
-    handler: src/index.handle
-    events:
-    - http:
-        path: /test
-        method: GET
+  test: ${file(./src/build.js):test}
+#    handler: src/index.handle
+#    events:
+#    - http:
+#        path: /test
+#        method: GET
 
 custom:
   customDomain:

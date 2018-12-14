@@ -22,7 +22,6 @@ export class Application {
     };
 
     async run(request) {
-        console.log(this.middleware);
         return await run(request, this.middleware);
     };
 };
