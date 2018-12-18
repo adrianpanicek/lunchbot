@@ -13,7 +13,6 @@ provider:
     TABLE_USERS: ${self:provider.stage}-users-2
     TABLE_REFRESH_TOKENS: ${self:provider.stage}-refresh-tokens
     TABLE_STASHES: ${self:provider.stage}-stashes
-    FUNCTIONS: ${self:functions}
   iamRoleStatements:
   - Effect: "Allow"
     Action:
@@ -109,7 +108,7 @@ functions:
     events:
     - http:
         path: /test
-        method: GET
+        method: POST
 
 custom:
   customDomain:

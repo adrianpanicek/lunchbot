@@ -2,6 +2,7 @@ import {Application, middlifyAction} from './application';
 
 import {jsonify} from './middleware/jsonify';
 import {catchErrors} from "./middleware/catchErrors";
+import {updateStash} from "./middleware/updateStash";
 
 const logRequest = async (req, next) => {
     console.log(req);
@@ -34,6 +35,7 @@ export const run = (action) => {
     // After
     app.use(jsonify);
     app.use(catchErrors);
+    app.use(updateStash);
 
     // Add action
     app.use(middlifyAction(action));
