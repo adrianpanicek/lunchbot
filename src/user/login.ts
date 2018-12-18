@@ -1,15 +1,15 @@
 'use strict';
-import {randomString, response, responseSuccess} from "../util";
+import {randomString} from "../util";
+import {responseSuccess, Denied, NotFound} from "../application";
 import { DynamoDB } from 'aws-sdk';
 import * as bcrypt from 'bcryptjs';
-import {AuthUser, RefreshToken, filterForToken} from "./model";
+import {AuthUser, RefreshToken} from "./model";
 import {sign} from "./token";
+import {run} from "../index";
 
 const db = new DynamoDB.DocumentClient();
 const refreshTokenLength = 32;
-const {TABLE_USERS, TABLE_REFRESH_TOKENS, TOKEN_SECRET, TOKEN_EXPIRATION} = process.env;
-
-console.log("Enviroment variables parsed");
+const {TABLE_USERS, TABLE_REFRESH_TOKENS} = process.env;
 
 export async function getUserFromIdentificator(identificator: string): Promise<AuthUser> {
     console.log('Fetching database for user ' + identificator);
@@ -42,23 +42,15 @@ async function registerRefreshToken(token: string, {identificator}: AuthUser): P
     return Item;
 }
 
-export async function handle(event) {
-    const {email, password} = JSON.parse(event.body)
-
+export const action = async ({body: {email, password}}) => {
     const user: AuthUser = await getUserFromIdentificator(email);
 
     if (!user) {
-        return response({
-            code: 404,
-            message: "User not found"
-        }, 404);
+        throw new NotFound("User was not found");
     }
 
     if (user.password !== await bcrypt.hash(password, user.salt)) {
-        return response({
-            code: 403,
-            message: "Bad credentials"
-        }, 403);
+        throw new Denied("Bad access credentials");
     }
 
     const {token: refreshToken} = await registerRefreshToken(randomString(refreshTokenLength), user);
@@ -68,3 +60,5 @@ export async function handle(event) {
         token: sign(user)
     });
 }
+
+export const handle = run(action);

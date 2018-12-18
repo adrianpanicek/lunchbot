@@ -1,16 +1,16 @@
-import {Application} from '../framework/index';
-import {router} from "./router";
+import {Application, middlifyAction} from './application';
 
 import {jsonify} from './middleware/jsonify';
-import {proxyFormat} from './middleware/proxyFormat';
+import {catchErrors} from "./middleware/catchErrors";
 
 const logRequest = async (req, next) => {
     console.log(req);
-    return next({...req});
+    return next(req);
 };
 
 const proxyMapRequest = async (req, next) => {
-    const res = {
+    console.log(req);
+    const result = {
         headers: req.headers,
         path: req.path,
         user: req.requestContext.authorizer.principalId,
@@ -21,21 +21,25 @@ const proxyMapRequest = async (req, next) => {
         pathParameters: req.pathParameters
     };
 
-    return next({...res});
+    return next(result);
 };
 
-export const handle = async (event, context) => {
+export const run = (action) => {
     const app = new Application;
 
+    // Before
     app.use(proxyMapRequest);
     app.use(logRequest);
-    app.use(proxyFormat);
-    app.use(jsonify);
 
-    const action = router(event, context);
-    app.use(action);
+    // After
+    app.use(jsonify);
+    app.use(catchErrors);
+
+    // Add action
+    app.use(middlifyAction(action));
+
     try {
-        return await app.run(event);
+        return async (event, context, ...params) => await app.run(event, context, ...params);
     } catch (e) {
         console.error(e);
     }

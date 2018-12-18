@@ -36,7 +36,7 @@ export function handle({authorizationToken, methodArn}: CustomAuthorizerEvent, c
         console.log('Allowed access to ' + methodArn + ' for ' + identificator);
         callback(null, generatePolicy(identificator, 'Allow', '*')); // Todo: This allows user to access any resource, change it to exact ARNs
     } catch (e) {
-        console.log('Refused authentication for token ' + stringToken);
+        console.log('Refused authentication for token ' + stringToken, e);
         callback(JSON.stringify(e));
     }
 }

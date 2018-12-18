@@ -52,7 +52,7 @@ functions:
         path: refreshToken
         method: post
   register:
-    handler: src/user/register.register
+    handler: src/user/register.handle
     events:
     - http:
         path: register
@@ -104,12 +104,12 @@ functions:
             parameters:
               paths:
                 aliasID: true
-  test: ${file(./src/build.js):test}
-#    handler: src/index.handle
-#    events:
-#    - http:
-#        path: /test
-#        method: GET
+  test:
+    handler: src/http/test.handle
+    events:
+    - http:
+        path: /test
+        method: GET
 
 custom:
   customDomain:

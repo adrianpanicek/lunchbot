@@ -1,14 +1,11 @@
 import { DynamoDB } from 'aws-sdk';
-import {response, responseCreated, responseNotFound, responseSuccess} from "../util";
-import * as bcrypt from "bcryptjs";
-import {AuthUser} from "../user/model";
+import {Conflict, responseCreated} from '../application';
+import {run} from '../index';
 
 const db = new DynamoDB.DocumentClient();
 const {TABLE_ALIASES} = process.env;
 
-export async function handle(event) {
-    const alias = JSON.parse(event.body); // Todo: check body size before parsing
-
+export async function action({body: alias}) {
     const Item = { // Todo: Validate inputs
         ...alias
     };
@@ -18,15 +15,14 @@ export async function handle(event) {
             TableName: TABLE_ALIASES,
             Item
         }).promise();
-    } catch(err) {
-        console.log(JSON.stringify(err));
-        return response({
-            code: 409,
-            message: "This alias name already exists"
-        }, 409);
+    } catch (e) {
+        console.log(e);
+        throw new Conflict('Alias with this ID already exists')
     }
 
     return responseCreated({
         alias: Item
     });
 };
+
+export const handle = run(action);

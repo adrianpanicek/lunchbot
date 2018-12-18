@@ -1,6 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
-import {responseCreated, responseNotFound, responseSuccess} from "../util";
 import * as crypto from 'crypto';
+import {responseCreated} from "../application";
+import {run} from "../index";
 
 const dynamo = new DynamoDB.DocumentClient();
 const {TABLE_ALIASES: TableName} = process.env;
@@ -12,9 +13,7 @@ const generateRandomToken = (len) => {
         .slice(0, len) // return required number of characters
 };
 
-export async function handle(event, context) {
-    const {aliasID} = event.pathParameters;
-
+export async function action({pathParameters: {aliasID}}) {
     const tokenLength = 128; // TODO: extract to config
     const accessToken = generateRandomToken(tokenLength);
 
@@ -27,3 +26,5 @@ export async function handle(event, context) {
 
     return responseCreated({accessToken});
 }
+
+export const handle = run(action);

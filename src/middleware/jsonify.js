@@ -1,5 +1,10 @@
 export const jsonify = async (req, next) => {
-    const result = await next({...req});
+    const result = await next(req);
+
+    if (result.body)
+        result.body = JSON.stringify(result.body);
     
-    return JSON.stringify(result);
+    console.log('jsonfigy', result);
+    
+    return result;
 };

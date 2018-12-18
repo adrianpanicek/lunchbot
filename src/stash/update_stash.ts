@@ -1,18 +1,19 @@
 import { DynamoDB } from 'aws-sdk';
-import {responseFailed, responseSuccess, randomString} from "../util";
+import {randomString} from "../util";
 import {BaseUser, UserToken} from "../user/model";
+import {BadRequest, Failed, responseSuccess} from "../application";
+import {run} from "../index";
 
 const dynamo = new DynamoDB.DocumentClient();
 const {TABLE_STASHES: TableName} = process.env;
 
-export async function handle(event) {
-    const {previousVersionToken, data} = JSON.parse(event.body);
+export async function action({body: {previousVersionToken, data}, user: identificator}) {
     const user: UserToken = {
-        identificator: event.requestContext.authorizer.principalId
+        identificator
     };
     if (!user.identificator) {
-        console.error("User not defined");
-        return responseFailed("User not defined");
+        console.error("Unknown user");
+        throw new BadRequest("Unknown user");
     }
 
     try {
@@ -20,7 +21,7 @@ export async function handle(event) {
         return responseSuccess({stash});
     } catch(e) {
         console.error(e);
-        return responseFailed(e);
+        throw new Failed(e);
     }
 }
 
@@ -37,3 +38,5 @@ export async function updateStash(user: BaseUser, previousVersionToken, data) {
         ReturnValues: "ALL_NEW"
     }).promise();
 }
+
+export const handle = run(action);

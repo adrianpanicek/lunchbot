@@ -1,8 +1,9 @@
 import {RefreshToken} from "./model";
-import {responseCreated, responseDenied} from "../util";
 import {DynamoDB} from "aws-sdk";
 import {sign} from "./token";
 import {getUserFromIdentificator} from "./login";
+import {run} from "../index";
+import {BadRequest, Denied, responseCreated} from "../application";
 
 const db = new DynamoDB.DocumentClient();
 const {TABLE_REFRESH_TOKENS} = process.env;
@@ -16,18 +17,14 @@ async function getRefreshToken(token: string): Promise<RefreshToken> {
     return dbToken as RefreshToken;
 }
 
-export async function handle(event) {
-    const {refreshToken} = JSON.parse(event.body);
-
+export async function action({body: {refreshToken}}) {
     if(!refreshToken) {
-        console.log('Refresh token parameter missing');
-        return responseDenied();
+        throw new BadRequest('Refresh token parameter missing');
     }
 
     const token: RefreshToken = await getRefreshToken(refreshToken);
     if(!token) {
-        console.log('Refresh token ' + refreshToken + ' not found in database');
-        return responseDenied();
+        throw new Denied(`Refresh token ${refreshToken} not found`);
     }
 
     const user = await getUserFromIdentificator(token.user_id);
@@ -35,3 +32,5 @@ export async function handle(event) {
         token: sign(user)
     });
 }
+
+export const handle = run(action);

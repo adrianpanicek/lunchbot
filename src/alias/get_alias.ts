@@ -1,20 +1,21 @@
 import { DynamoDB } from 'aws-sdk';
-import {responseNotFound, responseSuccess} from "../util";
+import {NotFound, responseSuccess} from "../application";
+import {run} from "../index";
 
 const dynamo = new DynamoDB.DocumentClient();
 const {TABLE_ALIASES} = process.env;
 
-export async function handle(event) {
-    const {aliasID} = event.pathParameters;
-
-    let {Item: alias} = await dynamo.get({
+export async function action({pathParameters: {aliasID}}) {
+        let {Item: alias} = await dynamo.get({
         TableName: TABLE_ALIASES,
         Key: {aliasID}
     }).promise();
 
     if(!alias) {
-        return responseNotFound();
+        throw new NotFound('Alias not found');
     }
 
     return responseSuccess(alias);
 };
+
+export const handle = run(action);
