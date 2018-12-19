@@ -4,13 +4,7 @@ import {jsonify} from './middleware/jsonify';
 import {catchErrors} from "./middleware/catchErrors";
 import {updateStash} from "./middleware/updateStash";
 
-const logRequest = async (req, next) => {
-    console.log(req);
-    return next(req);
-};
-
 const proxyMapRequest = async (req, next) => {
-    console.log(req);
     const result = {
         headers: req.headers,
         path: req.path,
@@ -30,7 +24,6 @@ export const run = (action) => {
 
     // Before
     app.use(proxyMapRequest);
-    app.use(logRequest);
 
     // After
     app.use(jsonify);

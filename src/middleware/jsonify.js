@@ -3,8 +3,6 @@ export const jsonify = async (req, next) => {
 
     if (result.body)
         result.body = JSON.stringify(result.body);
-    
-    console.log('jsonfigy', result);
-    
+
     return result;
 };

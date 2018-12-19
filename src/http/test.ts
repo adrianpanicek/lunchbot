@@ -1,6 +1,6 @@
 import {run} from '../index';
 import {responseSuccess} from "../application";
 
-const action = (req) => responseSuccess("Hello " + req.params.name);
+const action = (req) => responseSuccess("Hello");
 
 export const handle = run(action);

@@ -25,14 +25,7 @@ export const middlifyAction = (action: Action): Middleware => async (req, next) 
 
     response.originalRequest = req;
 
-    switch (typeof response) {
-        case 'object':
-            return next({...response});
-        case 'undefined':
-            return next({});
-        default:
-            return next({body: response});
-    }
+    return await next(response)
 };
 
 export class Application {
