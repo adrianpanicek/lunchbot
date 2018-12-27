@@ -11,7 +11,8 @@ export type ActionResult = object | Number | String ;
 
 export type Middleware = (Request, Middleware) => Request;
 
-export type Action = (Request) => any;
+export type Container = {[name: string]: any};
+export type Action = (Request, Container?) => any;
 
 export interface ResponseOptions {
     code: Number
@@ -19,8 +20,8 @@ export interface ResponseOptions {
 
 const run = async (request: Request, middleware: Middleware[]): Promise<Request> => middleware[0]? await middleware[0](request, res => run(res, middleware.slice(1))) : request;
 
-export const middlifyAction = (action: Action): Middleware => async (req, next) => {
-    let response = await action(req);
+export const middlifyAction = (action: Action, container: Container): Middleware => async (req, next) => {
+    let response = await action(req, container);
     console.log('Action response was', response);
 
     response.originalRequest = req;

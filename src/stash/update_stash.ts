@@ -1,5 +1,5 @@
 import {UserToken} from "../user/model";
-import {BadRequest, Failed, responseSuccess} from "../application";
+import {BadRequest, Denied, Failed, responseSuccess} from "../application";
 import {run} from "../index";
 import {update} from "./stash";
 
@@ -18,7 +18,13 @@ export async function action({body: {previousVersionToken, data}, user: identifi
         return responseSuccess({stash});
     } catch(e) {
         console.error(e);
-        throw new Failed(e);
+        switch(e.code) {
+            case 'ConditionalCheckFailedException':
+                throw new Denied('Invalid previousVersionToken');
+            default:
+                throw new Failed('Stash was not updated. Unknown error occured');
+        }
+
     }
 }
 

@@ -1,28 +1,21 @@
-import { DynamoDB } from 'aws-sdk';
-import * as crypto from 'crypto';
-import {responseCreated} from "../application";
+import {Denied, responseCreated} from "../application";
 import {run} from "../index";
+import {AliasAccessToken} from "../model/aliasAccessToken";
+import {Alias} from "../model/alias";
+import {randomString} from "../util";
 
-const dynamo = new DynamoDB.DocumentClient();
-const {TABLE_ALIASES: TableName} = process.env;
+export async function action({pathParameters: {aliasID}, user}) {
+    const alias = await Alias.queryOne({id: {eq: aliasID}}).exec();
+    if(alias.user === user) {
+        throw new Denied('Only owner of alias can create access token');
+    }
 
-const generateRandomToken = (len) => {
-    return crypto
-        .randomBytes(Math.ceil(len / 2))
-        .toString('hex') // convert to hexadecimal format
-        .slice(0, len) // return required number of characters
-};
+    const newToken = new AliasAccessToken({
+        id: aliasID,
+        accessToken: randomString(32)
+    });
 
-export async function action({pathParameters: {aliasID}}) {
-    const tokenLength = 128; // TODO: extract to config
-    const accessToken = generateRandomToken(tokenLength);
-
-    await dynamo.update({
-        TableName,
-        Key: {aliasID},
-        UpdateExpression: 'ADD aliasAccessTokens :c',
-        ExpressionAttributeValues: {':c': dynamo.createSet([accessToken])}
-    }).promise();
+    const accessToken = await newToken.save();
 
     return responseCreated({accessToken});
 }

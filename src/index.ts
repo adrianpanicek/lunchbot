@@ -3,6 +3,7 @@ import {Application, middlifyAction} from './application';
 import {jsonify} from './middleware/jsonify';
 import {catchErrors} from "./middleware/catchErrors";
 import {updateStash} from "./middleware/updateStash";
+import {Database, Transaction} from "./db";
 
 const proxyMapRequest = async (req, next) => {
     const result = {
@@ -10,7 +11,7 @@ const proxyMapRequest = async (req, next) => {
         path: req.path,
         user: req.requestContext.authorizer.principalId,
         method: req.httpMethod,
-        params: req.queryStringParameters,
+        params: req.queryStringParameters || {},
         body: JSON.parse(req.body),
         resource: req.resource,
         pathParameters: req.pathParameters
@@ -22,6 +23,8 @@ const proxyMapRequest = async (req, next) => {
 export const run = (action) => {
     const app = new Application;
 
+    const transaction = new Transaction(Database);
+
     // Before
     app.use(proxyMapRequest);
 
@@ -31,7 +34,7 @@ export const run = (action) => {
     app.use(updateStash);
 
     // Add action
-    app.use(middlifyAction(action));
+    app.use(middlifyAction(action, {transaction}));
 
     try {
         return async (event, context, ...params) => await app.run(event, context, ...params);

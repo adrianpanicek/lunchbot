@@ -33,9 +33,9 @@ app: alias
 tenant: adrianpanicek
 
 plugins:
-  - serverless-webpack
   - serverless-domain-manager
   - serverless-offline
+  - serverless-webpack
 
 functions:
   login:
@@ -116,6 +116,7 @@ custom:
     basePath: ''
     stage: ${self:provider.stage}
     createRoute53Record: true
+  webpackIncludeModules: true
   tableLimits:
     dev:
       read: 1
