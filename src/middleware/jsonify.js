@@ -4,5 +4,7 @@ export const jsonify = async (req, next) => {
     if (result.body)
         result.body = JSON.stringify(result.body);
 
+    delete result.originalRequest;
+
     return result;
 };

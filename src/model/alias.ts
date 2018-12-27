@@ -98,4 +98,4 @@ levels[2] = (): SchemaAttributes => {
 };
 
 export const AliasSchema = new Schema({...sharedKeys, ...levels.reduce((c, l) => ({...l(), ...c}), {})}, schemaOptions);
-export const Alias = Database.model('Alias2', AliasSchema) as ModelConstructor<Schema, Schema>;
+export const Alias = Database.model('Alias', AliasSchema);
