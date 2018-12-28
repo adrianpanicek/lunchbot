@@ -6,7 +6,10 @@
         "ES2015"
       ],
       "allowJs": true,
-      "moduleResolution": "node"
+      "moduleResolution": "node",
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "alwaysStrict": true
     },
     "exclude": [
       "node_modules"

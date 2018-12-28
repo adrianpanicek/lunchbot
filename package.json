@@ -4,20 +4,25 @@
   "description": "Alias App Backend",
   "main": "alias.js",
   "dependencies": {
+    "@aws/dynamodb-data-mapper": "^0.7.3",
+    "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
     "bcryptjs": "^2.4.3",
+    "class-validator": "^0.9.1",
     "dynamoose": "^1.3.0",
     "jsonwebtoken": "^8.3.0",
     "lambda-api": "^0.9.2",
-    "uuid": "^3.3.2",
-    "source-map-support": "^0.5.9"
+    "lodash": "^4.17.11",
+    "source-map-support": "^0.5.9",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.13",
+    "@types/bcryptjs": "^2.4.2",
     "@types/jsonwebtoken": "^7.2.8",
+    "@types/lodash": "^4.14.119",
     "@types/node": "^10.11.7",
     "@types/oauth2-server": "^3.0.9",
     "@types/uuid": "^3.4.4",
-    "@types/bcryptjs": "^2.4.2",
     "serverless": "^1.32.0",
     "serverless-domain-manager": "^2.6.6",
     "serverless-offline": "^3.31.3",
