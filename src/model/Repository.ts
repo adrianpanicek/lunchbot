@@ -1,7 +1,7 @@
 import {Model} from "./Model";
 
 // TODO: Temp, move to other file
-import {CreateTableOptions, DataMapper, QueryIterator} from "@aws/dynamodb-data-mapper";
+import {CreateTableOptions, DataMapper, QueryIterator, QueryOptions} from "@aws/dynamodb-data-mapper";
 import {DynamoDB} from 'aws-sdk';
 import {ConditionExpression} from "@aws/dynamodb-expressions";
 import * as _ from "lodash";
@@ -55,6 +55,10 @@ export abstract class Repository<T extends Model> {
         return mapper.get(model, {});
     }
 
+    getConsistent(model: T): Promise<T> {
+        return mapper.get(model, {readConsistency: 'strong'});
+    }
+
     delete(model: T): Promise<T> {
         return mapper.delete(model, {});
     }
@@ -62,4 +66,35 @@ export abstract class Repository<T extends Model> {
     find(keyCondition: {[key: string]: any}): QueryIterator<T> {
         return mapper.query(this.getModelType(), keyCondition, {});
     }
+
+    findByIndex(keyCondition: Partial<T>, index: Index, options: QueryOptions = {}): QueryIterator<T> {
+        const search: ConditionExpression = {
+            subject: _.keys(keyCondition)[0],
+            type: "Equals",
+            object: _.values(keyCondition)[0]
+        };
+        return mapper.query(this.getModelType(), search, {
+            indexName: index.name,
+            readConsistency: index.type === 'local'? 'strong' : 'eventual', // Strong consistency not supported on global
+            ...options
+        });
+    }
+
+    async init(): Promise<void> {
+        await this.createTable();
+    }
+}
+
+const repositoryContainer = {};
+// @ts-ignore TODO: Find out how to do this properly
+export const getRepository = async <T>(repo: typeof T): Promise<T> => {
+    if (repositoryContainer[repo.name]) {
+        return repositoryContainer[repo.name];
+    }
+
+    const instance =  new repo;
+    await instance.init();
+    repositoryContainer[repo.name] = instance;
+
+    return repositoryContainer[repo.name];
 }

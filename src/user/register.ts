@@ -1,36 +1,43 @@
-import {DynamoDB} from 'aws-sdk';
-import * as bcrypt from 'bcryptjs';
-import {AuthUser} from "./model";
 import {run} from "../index";
-import {Conflict, responseCreated} from "../application";
+import {BadRequest, Denied, responseCreated} from "../application";
+import {getRepository} from "../model/Repository";
+import {UserEmailRepository} from "../model/UserEmail/UserEmailRepository";
+import {UserRepository} from "../model/User/UserRepository";
+import {firewallFilter} from "../decorator/firewall";
+import {SecurityLevels} from "../model/User/User";
+import {UserFactory} from "../model/User/UserFactory";
+import {UserEmailFactory} from "../model/UserEmail/UserEmailFactory";
 
-const db = new DynamoDB.DocumentClient();
+const action = async (req) => {
+    const emailRepository = await getRepository<UserEmailRepository>(UserEmailRepository);
+    const userRepository = await getRepository<UserRepository>(UserRepository);
+    const userFactory = new UserFactory();
+    const userEmailFactory = new UserEmailFactory();
 
-const {TABLE_USERS} = process.env;
-
-export async function action({body: {email, password}}) {
-    const salt = await bcrypt.genSalt();
-
-    const user: AuthUser = {
-        identificator: email,
-        salt,
-        password: await bcrypt.hash(password, salt),
-        refreshTokens: []
-    };
+    const model = await userFactory.createFromObject(req.body);
 
     try {
-        await db.put({
-            TableName: TABLE_USERS,
-            Item: user,
-            ConditionExpression: "attribute_not_exists(email)",
-            ReturnValues: "ALL_OLD"
-        }).promise();
+        await model.validate();
     } catch(e) {
-        console.error(e);
-        throw new Conflict("User with that email already exists");
+        throw new BadRequest(e.message);
     }
 
-    return responseCreated(user);
-}
+    await model.hashPassword();
+
+    const emailModel = userEmailFactory.createFromUser(model);
+
+    try {
+        await emailRepository.save(emailModel);
+    } catch (e) {
+        throw new Denied('Email already registered');
+    }
+
+    try {
+        const result = await userRepository.save(model);
+        return responseCreated(firewallFilter(result, SecurityLevels.RESOURCE_OWNER));
+    } catch (e) {
+        throw new Denied('User Unique ID collision');
+    }
+};
 
 export const handle = run(action);

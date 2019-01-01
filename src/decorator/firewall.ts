@@ -8,7 +8,6 @@ export function firewall(level: number) {
 }
 
 export function firewallFilter(obj: object, level: number) {
-    console.log(obj);
     // @ts-ignore
     return _.pickBy(obj, (v, k) => (Reflect.getMetadata(firewallMetadataKey, obj, k) || 0) <= level);
 }

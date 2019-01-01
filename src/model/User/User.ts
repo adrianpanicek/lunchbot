@@ -6,7 +6,8 @@ import {
 import {IsEmail, IsUUID, MaxLength, MinLength} from "class-validator";
 import {Model} from "../Model";
 import {Index} from "../Index";
-import {firewall} from "../../firewall";
+import {firewall} from "../../decorator/firewall";
+import * as bcrypt from "bcryptjs";
 
 enum ValidationGroups {
     Registration = 'registration'
@@ -58,4 +59,11 @@ export class User extends Model {
             writeCapacityUnits: 5
         }
     };
+
+    async hashPassword(): Promise<void> {
+        if (!this.salt)
+            this.salt = await bcrypt.genSalt();
+
+        this.password = await bcrypt.hash(this.password, this.salt);
+    }
 }

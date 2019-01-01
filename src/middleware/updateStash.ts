@@ -1,4 +1,3 @@
-import {BaseUser} from "../user/model";
 import {BadRequest} from "../application";
 import {Stash} from "../model/userStash";
 

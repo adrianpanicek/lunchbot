@@ -1,6 +1,5 @@
 import {AuthResponse, CustomAuthorizerEvent} from "aws-lambda";
-import {UserToken} from "./user/model";
-import {verify} from "./user/token";
+import {UserAccessTokenFactory} from "./model/UserAccessToken/UserAccessTokenFactory";
 
 const generatePolicy = (principalId: string, effect: string, resource: any): AuthResponse => {
     const authResponse: AuthResponse = {
@@ -30,11 +29,12 @@ export function handle({authorizationToken, methodArn}: CustomAuthorizerEvent, c
     }
 
     const stringToken = authorizationToken.replace(/^Bearer /, '');
+    const userAccessTokenFactory = new UserAccessTokenFactory();
     try {
-        let {identificator}: UserToken = verify(stringToken);
+        const {user} = userAccessTokenFactory.createFromString(stringToken);
 
-        console.log('Allowed access to ' + methodArn + ' for ' + identificator);
-        callback(null, generatePolicy(identificator, 'Allow', '*')); // Todo: This allows user to access any resource, change it to exact ARNs
+        console.log('Allowed access to ' + methodArn + ' for ' + user);
+        callback(null, generatePolicy(user, 'Allow', '*')); // Todo: This allows user to access any resource, change it to exact ARNs
     } catch (e) {
         console.log('Refused authentication for token ' + stringToken, e);
         callback(JSON.stringify(e));

@@ -1,15 +1,18 @@
 import {run} from '../index';
-import {Failed, responseSuccess} from "../application";
-import {Stash} from "../model/userStash";
+import {responseSuccess} from "../application";
+import {UserStashFactory} from "../model/UserStash/UserStashFactory";
+import {getRepository} from "../model/Repository";
+import {UserStashRepository} from "../model/UserStash/UserStashRepository";
 
 export async function action({user}) {
-    try {
-        let stash = await Stash.getLatest(user);
-        return responseSuccess(stash);
-    } catch(e) {
-        console.error(e);
-        throw new Failed(e);
-    }
+    const factory = new UserStashFactory();
+    const repository = await getRepository<UserStashRepository>(UserStashRepository);
+    const model = factory.createFromObject({user});
+
+    const stash = await repository.getLatest(model)
+    stash.serializeData();
+
+    return responseSuccess(stash);
 }
 
 export const handle = run(action);
