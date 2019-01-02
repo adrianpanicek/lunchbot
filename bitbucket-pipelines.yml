@@ -1,3 +1,4 @@
+-f
 # This is a sample build configuration for Other.
 # Check our guides at https://confluence.atlassian.com/x/5Q4SMw for more examples.
 # Only use spaces to indent your .yml configuration.
@@ -8,12 +9,14 @@ image: node:8
 pipelines:
   default:
     - step:
-        name: Build NPM
-        script:
-          - npm install
+      name: Build NPM
+      script:
+        - npm install
+      artifacts:
+        - node_modules/**
     - step:
-          name:  Deploy to dev
-          image: softinstigate/serverless:latest
-          deployment: test
-          script:
-            - serverless deploy --stage dev
+      name:  Deploy to dev
+      image: softinstigate/serverless:latest
+      deployment: test
+      script:
+        - serverless deploy --stage $(echo $BITBUCKET_BRANCH | sed -e 's/\//_/g')

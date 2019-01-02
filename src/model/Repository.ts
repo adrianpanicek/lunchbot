@@ -7,7 +7,8 @@ import {ConditionExpression} from "@aws/dynamodb-expressions";
 import * as _ from "lodash";
 import {Index} from "./Index";
 
-const mapper = new DataMapper({client: new DynamoDB, readConsistency: "strong", tableNamePrefix: '_prototype_'});
+const {TABLE_PREFIX} = process.env;
+const mapper = new DataMapper({client: new DynamoDB, readConsistency: "strong", tableNamePrefix: TABLE_PREFIX});
 
 export abstract class Repository<T extends Model> {
     protected abstract getModelType(): new () => T;
