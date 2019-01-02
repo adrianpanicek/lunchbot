@@ -18,4 +18,4 @@ pipelines:
       image: softinstigate/serverless:latest
       deployment: test
       script:
-      - serverless deploy --stage $(echo $BITBUCKET_BRANCH | sed -e 's/\//_/g')
+      - serverless deploy --stage $(echo $BITBUCKET_BRANCH | sed -e 's/\//-/g')

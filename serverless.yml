@@ -109,9 +109,11 @@ functions:
         method: POST
 
 custom:
+  basePaths: # Override basePaths for specific domain
+    master: ''
   customDomain:
     domainName: alias.panicek.com
-    basePath: ''
+    basePath: ${self:custom.basePaths.${self:provider.stage}, ${self:provider.stage}}
     stage: ${self:provider.stage}
     createRoute53Record: true
   webpackIncludeModules: true
