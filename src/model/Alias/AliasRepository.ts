@@ -1,7 +1,7 @@
 import {Repository} from "../Repository";
 import {Alias} from "./Alias";
 
-class AliasRepository extends Repository<Alias> {
+export class AliasRepository extends Repository<Alias> {
     protected getHashKey(): keyof Alias {
         return 'id';
     }

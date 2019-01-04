@@ -77,13 +77,13 @@ functions:
     handler: src/alias/get_alias.handle
     events:
       - http:
-          path: aliases/{aliasID}
+          path: aliases/{id}
           method: get
           authorizer: authorizer
           request:
             parameters:
               paths:
-                aliasID: true
+                id: true
   create_alias:
     handler: src/alias/create_alias.handle
     events:

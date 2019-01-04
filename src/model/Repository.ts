@@ -88,12 +88,12 @@ export abstract class Repository<T extends Model> {
 
 const repositoryContainer = {};
 // @ts-ignore TODO: Find out how to do this properly
-export const getRepository = async <T>(repo: typeof T): Promise<T> => {
+export const getRepository = async <T extends Repository>(repo: new () => T): Promise<T> => {
     if (repositoryContainer[repo.name]) {
         return repositoryContainer[repo.name];
     }
 
-    const instance =  new repo;
+    const instance = new repo;
     await instance.init();
     repositoryContainer[repo.name] = instance;
 

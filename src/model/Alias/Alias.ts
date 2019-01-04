@@ -2,7 +2,7 @@ import {Model} from "../Model";
 import {table, hashKey, attribute} from "@aws/dynamodb-data-mapper-annotations";
 import {IsDefined, IsUrl, IsUUID, Length} from "class-validator";
 import {randomString} from "../../util";
-import {binary} from "../../decorator/binary";
+import {binary, deserializeBinary, serializeBinary} from "../../decorator/binary";
 import {firewall} from "../../decorator/firewall";
 import {Index} from "../Index";
 
@@ -73,8 +73,18 @@ export class Alias extends Model {
     static indexes: {[key: string]: Index} = {
         AliasNameIndex: {
             name: 'AliasNameIndex',
-            type: 'local',
-            projection: 'all'
+            type: 'global',
+            projection: 'all',
+            readCapacityUnits: 5,
+            writeCapacityUnits: 5
         }
     };
+
+    serialize() {
+        return Object.assign(this, serializeBinary(this));
+    }
+
+    deserialize() {
+        return Object.assign(this, deserializeBinary(this));
+    }
 }
