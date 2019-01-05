@@ -1,6 +1,9 @@
 import {Model} from "../Model";
 import {table, hashKey, rangeKey, attribute} from "@aws/dynamodb-data-mapper-annotations";
 import {IsDefined} from "class-validator";
+import {randomString} from "../../util";
+
+const ACCESS_TOKEN_LENGTH = 40;
 
 @table('alias_access_token')
 export class AliasAccessToken extends Model {
@@ -8,7 +11,7 @@ export class AliasAccessToken extends Model {
     @IsDefined()
     alias: string;
 
-    @rangeKey()
+    @rangeKey({defaultProvider: () => randomString(ACCESS_TOKEN_LENGTH)})
     @IsDefined()
     accessToken: string;
 

@@ -95,12 +95,13 @@ functions:
     handler: src/alias/create_access_token.handle
     events:
       - http:
-          path: /aliases/{aliasID}/accessTokens
+          path: /aliases/{alias}/accessTokens
           method: POST
+          authorizer: authorizer
           request:
             parameters:
               paths:
-                aliasID: true
+                alias: true
   test:
     handler: src/http/test.handle
     events:
@@ -109,11 +110,9 @@ functions:
         method: POST
 
 custom:
-  basePaths: # Override basePaths for specific domain
-    master: ''
   customDomain:
     domainName: alias.panicek.com
-    basePath: ${self:custom.basePaths.${self:provider.stage}, ${self:provider.stage}}
+    basePath: ''
     stage: ${self:provider.stage}
     createRoute53Record: true
   webpackIncludeModules: true
