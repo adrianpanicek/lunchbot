@@ -15,8 +15,7 @@ export async function action({body: {previousVersionToken, data}, user}) {
 
     try {
         model.deserializeData();
-        const stash = await repository.updateStash(model);
-        console.log(stash);
+        const stash = await repository.update(model);
         stash.serializeData();
         return responseSuccess(stash);
     } catch(e) {

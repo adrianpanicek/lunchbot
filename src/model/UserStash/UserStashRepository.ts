@@ -15,7 +15,7 @@ export class UserStashRepository extends Repository<UserStash> {
         return {readCapacityUnits: 5, writeCapacityUnits: 5};
     }
 
-    async updateStash(stash: UserStash): Promise<UserStash> {
+    async update(stash: UserStash): Promise<UserStash> {
         const search = {user: stash.user};
         const index = UserStash.indexes.OnlyVersionByCreatedIndex;
         const options = {scanIndexForward: false};
@@ -28,9 +28,13 @@ export class UserStashRepository extends Repository<UserStash> {
 
         if (prevStash && prevStash.versionToken !== stash.previousVersionToken) {
             throw new VersionMismatch('Parameter previousVersionToken does not match version of last stash recorded');
-    }
+        }
 
         return await this.save(stash);
+    }
+
+    async rollback(stash: UserStash): Promise<UserStash> {
+        return await this.delete(stash);
     }
 
     async getLatest(stash: UserStash): Promise<UserStash|null> {

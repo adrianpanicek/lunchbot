@@ -6,7 +6,7 @@ import {AliasFactory} from "../model/Alias/AliasFactory";
 import {AliasNameRepository} from "../model/AliasName/AliasNameRepository";
 import {AliasNameFactory} from "../model/AliasName/AliasNameFactory";
 
-export async function action({body: {alias}, user}) {
+export async function action({body: alias, user}) {
     const repository = await getRepository(AliasRepository);
     const factory = new AliasFactory();
     const aliasModel = factory.createFromObject({...alias, user}).deserialize();
@@ -31,9 +31,7 @@ export async function action({body: {alias}, user}) {
 
     try {
         const response = (await repository.save(aliasModel)).serialize();
-        return responseCreated({
-            alias: response
-        });
+        return responseCreated(response);
     } catch (e) {
         console.log(e);
         throw new Failed('Error in saving alias')
