@@ -37,33 +37,33 @@ plugins:
 
 functions:
   login:
-    handler: src/user/login.handle
+    handler: src/action/user/login.handle
     events:
     - http:
         path: login
         method: post
   refresh_token:
-    handler: src/user/refresh_token.handle
+    handler: src/action/user/refresh_token.handle
     events:
     - http:
         path: refreshToken
         method: post
   register:
-    handler: src/user/register.handle
+    handler: src/action/user/register.handle
     events:
     - http:
         path: register
         method: post
 
-  update_stash:
-    handler: src/stash/update_stash.handle
+  put_stash:
+    handler: src/action/stash/put.handle
     events:
     - http:
         path: user/stash
         method: put
         authorizer: authorizer
   get_stash:
-    handler: src/stash/get_stash.handle
+    handler: src/action/stash/get.handle
     events:
     - http:
         path: user/stash
@@ -74,25 +74,26 @@ functions:
     handler: src/authorize.handle
 
   get_alias:
-    handler: src/alias/get_alias.handle
+    handler: src/action/alias/get.handle
     events:
       - http:
-          path: aliases/{id}
+          path: aliases/{alias}
           method: get
           authorizer: authorizer
           request:
             parameters:
               paths:
-                id: true
-  create_alias:
-    handler: src/alias/create_alias.handle
+                alias: true
+  post_alias:
+    handler: src/action/alias/post.handle
     events:
     - http:
         path: aliases
         method: post
         authorizer: authorizer
-  add_access_token:
-    handler: src/alias/create_access_token.handle
+
+  post_access_token:
+    handler: src/action/alias/accessToken/post.handle
     events:
       - http:
           path: /aliases/{alias}/accessTokens
@@ -102,12 +103,6 @@ functions:
             parameters:
               paths:
                 alias: true
-  test:
-    handler: src/http/test.handle
-    events:
-    - http:
-        path: /test
-        method: POST
 
 custom:
   customDomain:
@@ -116,11 +111,6 @@ custom:
     stage: ${self:provider.stage}
     createRoute53Record: true
   webpackIncludeModules: true
-  tableLimits:
-    dev:
-      read: 1
-      write: 1
 
-resources:
-  # DynamoDB
-  - ${file(resources/dynamodb-tables.yml)}
+package:
+  individually: true

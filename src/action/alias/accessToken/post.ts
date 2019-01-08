@@ -1,10 +1,10 @@
-import {Denied, responseCreated} from "../application";
-import {run} from "../index";
-import {AliasAccessTokenFactory} from "../model/AliasAccessToken/AliasAccessTokenFactory";
-import {AliasRepository} from "../model/Alias/AliasRepository";
-import {getRepository} from "../model/Repository";
-import {AliasFactory} from "../model/Alias/AliasFactory";
-import {AliasAccessTokenRepository} from "../model/AliasAccessToken/AliasAccessTokenRepository";
+import {Denied, responseCreated} from "@app/application";
+import {run} from "@app/index";
+import {AliasAccessTokenFactory} from "@app/model/AliasAccessToken/AliasAccessTokenFactory";
+import {AliasRepository} from "@app/model/Alias/AliasRepository";
+import {getRepository} from "@app/model/Repository";
+import {AliasFactory} from "@app/model/Alias/AliasFactory";
+import {AliasAccessTokenRepository} from "@app/model/AliasAccessToken/AliasAccessTokenRepository";
 
 export async function action({pathParameters: {alias}, user}) {
     const aliasFactory = new AliasFactory();

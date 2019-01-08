@@ -1,13 +1,12 @@
 import "reflect-metadata";
 import * as _ from "lodash";
 
-const firewallMetadataKey = Symbol('firewall');
+const createSymbol = (action: string): Symbol => Symbol('firewall-' + action);
 
-export function firewall(level: number) {
-    return Reflect.metadata(firewallMetadataKey, level);
+export function firewall(level: number, action: string = 'default') {
+    return Reflect.metadata(createSymbol(action), action + level);
 }
 
-export function firewallFilter(obj: object, level: number) {
-    // @ts-ignore
-    return _.pickBy(obj, (v, k) => (Reflect.getMetadata(firewallMetadataKey, obj, k) || 0) <= level);
+export function firewallFilter(obj: object, level: number, action: string = 'default') {
+    return _.pickBy(obj, (v, k) => (Reflect.getMetadata(createSymbol(action), obj, k) || 0) <= level);
 }

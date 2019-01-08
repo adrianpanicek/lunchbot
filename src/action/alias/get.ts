@@ -1,14 +1,14 @@
-import {Denied, NotFound, responseSuccess} from "../application";
-import {run} from "../index";
-import {getRepository} from "../model/Repository";
-import {AliasRepository} from "../model/Alias/AliasRepository";
-import {AliasFactory} from "../model/Alias/AliasFactory";
-import {Alias, AliasSecurityLevel} from "../model/Alias/Alias";
-import {firewallFilter} from "../decorator/firewall";
-import {AliasAccessTokenFactory} from "../model/AliasAccessToken/AliasAccessTokenFactory";
-import {AliasAccessTokenRepository} from "../model/AliasAccessToken/AliasAccessTokenRepository";
+import {Denied, NotFound, responseSuccess} from "@app/application";
+import {run} from "@app/index";
+import {getRepository} from "@app/model/Repository";
+import {AliasRepository} from "@app/model/Alias/AliasRepository";
+import {AliasFactory} from "@app/model/Alias/AliasFactory";
+import {Alias, AliasSecurityLevel} from "@app/model/Alias/Alias";
+import {firewallFilter} from "@app/decorator/firewall";
+import {AliasAccessTokenFactory} from "@app/model/AliasAccessToken/AliasAccessTokenFactory";
+import {AliasAccessTokenRepository} from "@app/model/AliasAccessToken/AliasAccessTokenRepository";
 
-export async function action({pathParameters: {id}, params, user}) {
+export async function action({pathParameters: {alias: id}, params, user}) {
     const aliasRepository = await getRepository<AliasRepository>(AliasRepository);
     const aliasFactory = new AliasFactory();
 

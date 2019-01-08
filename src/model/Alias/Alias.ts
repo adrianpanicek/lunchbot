@@ -23,6 +23,7 @@ export class Alias extends Model {
 
     @attribute()
     @IsUUID("4")
+    @firewall(AliasSecurityLevel.SERVER, 'update')
     user: string;
 
     @attribute({
@@ -31,6 +32,7 @@ export class Alias extends Model {
         }
     })
     @IsDefined()
+    @firewall(AliasSecurityLevel.SERVER, 'update')
     aliasName: string;
 
     @attribute({defaultProvider: () => false})
@@ -47,6 +49,7 @@ export class Alias extends Model {
     @attribute()
     @IsDefined()
     @binary()
+    @firewall(AliasSecurityLevel.SERVER, 'update')
     publicKey: Buffer;
 
     @attribute({defaultProvider: () => new Date})

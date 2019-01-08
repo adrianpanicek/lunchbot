@@ -1,11 +1,11 @@
-import {run} from "../index";
-import {Denied, Failed, responseCreated} from "../application";
-import {getRepository} from "../model/Repository";
-import {UserRepository} from "../model/User/UserRepository";
-import {UserRefreshTokenRepository} from "../model/UserRefreshToken/UserRefreshTokenRepository";
-import {UserRefreshTokenFactory} from "../model/UserRefreshToken/UserRefreshTokenFactory";
-import {UserAccessTokenFactory} from "../model/UserAccessToken/UserAccessTokenFactory";
-import {UserFactory} from "../model/User/UserFactory";
+import {run} from "@app/index";
+import {Denied, Failed, responseCreated} from "@app/application";
+import {getRepository} from "@app/model/Repository";
+import {UserRepository} from "@app/model/User/UserRepository";
+import {UserRefreshTokenRepository} from "@app/model/UserRefreshToken/UserRefreshTokenRepository";
+import {UserRefreshTokenFactory} from "@app/model/UserRefreshToken/UserRefreshTokenFactory";
+import {UserAccessTokenFactory} from "@app/model/UserAccessToken/UserAccessTokenFactory";
+import {UserFactory} from "@app/model/User/UserFactory";
 
 const action = async ({body: {refreshToken}}) => {
     const tokenRepository = await getRepository<UserRefreshTokenRepository>(UserRefreshTokenRepository);

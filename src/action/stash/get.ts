@@ -1,8 +1,8 @@
-import {run} from '../index';
-import {responseSuccess} from "../application";
-import {UserStashFactory} from "../model/UserStash/UserStashFactory";
-import {getRepository} from "../model/Repository";
-import {UserStashRepository} from "../model/UserStash/UserStashRepository";
+import {run} from '@app/index';
+import {responseSuccess} from "@app/application";
+import {UserStashFactory} from "@app/model/UserStash/UserStashFactory";
+import {getRepository} from "@app/model/Repository";
+import {UserStashRepository} from "@app/model/UserStash/UserStashRepository";
 
 export async function action({user}) {
     const factory = new UserStashFactory();

@@ -1,10 +1,10 @@
-import {BadRequest, Denied, Failed, responseCreated} from '../application';
-import {run} from '../index';
-import {getRepository} from "../model/Repository";
-import {AliasRepository} from "../model/Alias/AliasRepository";
-import {AliasFactory} from "../model/Alias/AliasFactory";
-import {AliasNameRepository} from "../model/AliasName/AliasNameRepository";
-import {AliasNameFactory} from "../model/AliasName/AliasNameFactory";
+import {BadRequest, Denied, Failed, responseCreated} from '@app/application';
+import {run} from '@app/index';
+import {getRepository} from "@app/model/Repository";
+import {AliasRepository} from "@app/model/Alias/AliasRepository";
+import {AliasFactory} from "@app/model/Alias/AliasFactory";
+import {AliasNameRepository} from "@app/model/AliasName/AliasNameRepository";
+import {AliasNameFactory} from "@app/model/AliasName/AliasNameFactory";
 
 export async function action({body: alias, user}) {
     const repository = await getRepository(AliasRepository);

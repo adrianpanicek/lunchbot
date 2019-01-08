@@ -1,12 +1,12 @@
-import {run} from "../index";
-import {BadRequest, Denied, responseCreated} from "../application";
-import {getRepository} from "../model/Repository";
-import {UserEmailRepository} from "../model/UserEmail/UserEmailRepository";
-import {UserRepository} from "../model/User/UserRepository";
-import {firewallFilter} from "../decorator/firewall";
-import {SecurityLevels} from "../model/User/User";
-import {UserFactory} from "../model/User/UserFactory";
-import {UserEmailFactory} from "../model/UserEmail/UserEmailFactory";
+import {run} from "@app/index";
+import {BadRequest, Denied, responseCreated} from "@app/application";
+import {getRepository} from "@app/model/Repository";
+import {UserEmailRepository} from "@app/model/UserEmail/UserEmailRepository";
+import {UserRepository} from "@app/model/User/UserRepository";
+import {firewallFilter} from "@app/decorator/firewall";
+import {SecurityLevels} from "@app/model/User/User";
+import {UserFactory} from "@app/model/User/UserFactory";
+import {UserEmailFactory} from "@app/model/UserEmail/UserEmailFactory";
 
 const action = async (req) => {
     const emailRepository = await getRepository<UserEmailRepository>(UserEmailRepository);

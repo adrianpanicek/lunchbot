@@ -10,7 +10,11 @@
       "moduleResolution": "node",
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
-      "alwaysStrict": true
+      "alwaysStrict": true,
+      "baseUrl": "src",
+      "paths": {
+        "@app/*": ["./*"]
+      }
     },
     "exclude": [
       "node_modules"

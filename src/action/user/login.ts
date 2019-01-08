@@ -1,13 +1,13 @@
-import {responseSuccess, Denied} from "../application";
-import {run} from "../index";
-import {getRepository} from "../model/Repository";
-import {User} from "../model/User/User";
-import {UserRepository} from "../model/User/UserRepository";
-import {UserRefreshTokenFactory} from "../model/UserRefreshToken/UserRefreshTokenFactory";
-import {UserRefreshTokenRepository} from "../model/UserRefreshToken/UserRefreshTokenRepository";
-import {UserAccessTokenFactory} from "../model/UserAccessToken/UserAccessTokenFactory";
-import {UserFactory} from "../model/User/UserFactory";
-import {UserRefreshToken} from "../model/UserRefreshToken/UserRefreshToken";
+import {responseSuccess, Denied} from "@app/application";
+import {run} from "@app/index";
+import {getRepository} from "@app/model/Repository";
+import {User} from "@app/model/User/User";
+import {UserRepository} from "@app/model/User/UserRepository";
+import {UserRefreshTokenFactory} from "@app/model/UserRefreshToken/UserRefreshTokenFactory";
+import {UserRefreshTokenRepository} from "@app/model/UserRefreshToken/UserRefreshTokenRepository";
+import {UserAccessTokenFactory} from "@app/model/UserAccessToken/UserAccessTokenFactory";
+import {UserFactory} from "@app/model/User/UserFactory";
+import {UserRefreshToken} from "@app/model/UserRefreshToken/UserRefreshToken";
 
 export const action = async (req) => {
     const repository = await getRepository<UserRepository>(UserRepository);
