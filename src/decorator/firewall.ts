@@ -1,10 +1,10 @@
 import "reflect-metadata";
 import * as _ from "lodash";
 
-const createSymbol = (action: string): Symbol => Symbol('firewall-' + action);
+const createSymbol = (action: string): string => 'firewall-' + action;
 
 export function firewall(level: number, action: string = 'default') {
-    return Reflect.metadata(createSymbol(action), action + level);
+    return Reflect.metadata(createSymbol(action), level);
 }
 
 export function firewallFilter(obj: object, level: number, action: string = 'default') {

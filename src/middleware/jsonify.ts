@@ -1,6 +1,8 @@
 export const jsonify = async (req, next) => {
     const result = await next(req);
 
+    console.log("Decoding json body", result.body);
+
     if (result.body)
         result.body = JSON.stringify(result.body);
 

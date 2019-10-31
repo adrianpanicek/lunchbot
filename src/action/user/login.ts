@@ -1,53 +1,64 @@
 import {responseSuccess, Denied} from "@app/application";
 import {run} from "@app/index";
 import {getRepository} from "@app/model/Repository";
-import {User} from "@app/model/User/User";
 import {UserRepository} from "@app/model/User/UserRepository";
-import {UserRefreshTokenFactory} from "@app/model/UserRefreshToken/UserRefreshTokenFactory";
-import {UserRefreshTokenRepository} from "@app/model/UserRefreshToken/UserRefreshTokenRepository";
-import {UserAccessTokenFactory} from "@app/model/UserAccessToken/UserAccessTokenFactory";
-import {UserFactory} from "@app/model/User/UserFactory";
-import {UserRefreshToken} from "@app/model/UserRefreshToken/UserRefreshToken";
+import {UserFactory} from "@app/service/UserFactory";
+import {UserAccessTokenFactory} from "@app/service/UserAccessTokenFactory";
+import {User} from "@app/model/User/User";
 
 export const action = async (req) => {
-    const repository = await getRepository<UserRepository>(UserRepository);
     const userFactory = new UserFactory();
-    const model = await userFactory.createFromObject(req.body);
 
-    const user = await repository.getByEmail(model);
-    if (!user) {
-        console.log('User with this email not found', model.email);
-        throw new Denied('Wrong credentials');
-    }
+    const model = userFactory.createFromObject(req.body);
+    const repository = await getRepository<UserRepository>(UserRepository);
 
-    model.salt = user.salt; // Check passwords using same salt
-    await model.hashPassword();
-    if (model.password !== user.password) {
-        console.log('User entered invalid password', model.password, user.password);
-        throw new Denied('Wrong credentials')
-    }
-
-    const refreshToken = await saveRefreshToken(user);
-
-    const accessTokenFactory = new UserAccessTokenFactory();
-    const accessToken = accessTokenFactory.createFromObject({user: user.id});
+    const user = await findUser(repository, model);
+    await authorizeUser(model, user);
+    const refreshToken = addRefreshToken(user);
+    await repository.update(user);
+    const accessToken = await createAccessToken(user);
 
     return responseSuccess({
-        refreshToken: refreshToken.token,
-        token: await accessToken.sign()
+        refreshToken: refreshToken,
+        accessToken: accessToken
     });
 };
 
-const saveRefreshToken = async (user: User): Promise<UserRefreshToken> => {
-    console.log('Creating refresh token');
-    const refreshToken = new UserRefreshTokenFactory().createFromObject({user: user.id});
-    console.log('Created refresh token', refreshToken);
+async function findUser(repository: UserRepository, inputModel: User): Promise<User> {
+    console.log("Looking for user");
+    const user = await repository.getByEmail(inputModel);
+    if (!user) {
+        console.log('User with this email not found', inputModel.email);
+        throw new Denied('Wrong credentials');
+    }
 
-    const refreshTokenRepository = await getRepository<UserRefreshTokenRepository>(UserRefreshTokenRepository);
-    const result = await refreshTokenRepository.save(refreshToken);
+    return user;
+}
 
-    console.log('Saved refresh token', result)
-    return result;
+async function authorizeUser(model: User, user: User): Promise<void> {
+    console.log("Authorizing user");
+    const hashedPassword = await model.hashPassword(model.password, user.salt);
+    if (hashedPassword !== user.password) {
+        console.log('User entered invalid password', model.password, user.password);
+        throw new Denied('Wrong credentials')
+    }
+}
+
+function addRefreshToken(user: User): string {
+    console.log("Adding refresh token");
+    const refreshToken = user.createRefreshToken();
+    user.refreshTokens.add(refreshToken);
+    console.log("Refresh token added");
+
+    return refreshToken;
+}
+
+async function createAccessToken(user: User): Promise<string> {
+    console.log("Creating access token");
+    const userAccessTokenFactory = new UserAccessTokenFactory();
+    const accessToken = userAccessTokenFactory.fromUser(user);
+
+    return await accessToken.sign();
 }
 
 export const handle = run(action);

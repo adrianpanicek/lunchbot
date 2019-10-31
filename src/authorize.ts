@@ -1,5 +1,5 @@
 import {AuthResponse, CustomAuthorizerEvent} from "aws-lambda";
-import {UserAccessTokenFactory} from "./model/UserAccessToken/UserAccessTokenFactory";
+import {AccessToken} from "./model/User/AccessToken";
 
 const generatePolicy = (principalId: string, effect: string, resource: any): AuthResponse => {
     const authResponse: AuthResponse = {
@@ -23,15 +23,15 @@ const generatePolicy = (principalId: string, effect: string, resource: any): Aut
     return authResponse;
 };
 
-export function handle({authorizationToken, methodArn}: CustomAuthorizerEvent, context, callback) {
-    if (!authorizationToken) {
-        throw new Error('Unauthorized');
+export function handle({authorizationToken, methodArn, headers}: CustomAuthorizerEvent, context, callback) {
+    const token = authorizationToken || headers['Authorization']; // This is ugly hack, but enough for now
+    if (!token) {
+        throw new Error('Authorization token not provided');
     }
 
-    const stringToken = authorizationToken.replace(/^Bearer /, '');
-    const userAccessTokenFactory = new UserAccessTokenFactory();
+    const stringToken = token.replace(/^Bearer /, '');
     try {
-        const {user} = userAccessTokenFactory.createFromString(stringToken);
+        const {user} = AccessToken.fromString(stringToken);
 
         console.log('Allowed access to ' + methodArn + ' for ' + user);
         callback(null, generatePolicy(user, 'Allow', '*')); // Todo: This allows user to access any resource, change it to exact ARNs

@@ -8,6 +8,9 @@ import {Model} from "../Model";
 import {Index} from "../Index";
 import {firewall} from "../../decorator/firewall";
 import * as bcrypt from "bcryptjs";
+import {randomString} from "@app/util";
+
+const REFRESH_TOKEN_LENGTH = 20; // arbitrary hard-code
 
 enum ValidationGroups {
     Registration = 'registration'
@@ -47,6 +50,10 @@ export class User extends Model {
     @firewall(SecurityLevels.SERVER)
     salt: string;
 
+    @attribute({memberType: 'String', defaultProvider: () => new Set})
+    @firewall(SecurityLevels.SERVER)
+    refreshTokens: Set<string>;
+
     @attribute({defaultProvider: () => new Date})
     createdAt: Date;
 
@@ -60,10 +67,15 @@ export class User extends Model {
         }
     };
 
-    async hashPassword(): Promise<void> {
-        if (!this.salt)
-            this.salt = await bcrypt.genSalt();
+    async createSalt(): Promise<string> {
+        return await bcrypt.genSalt();
+    }
 
-        this.password = await bcrypt.hash(this.password, this.salt);
+    async hashPassword(password: string, salt: string): Promise<string> {
+        return await bcrypt.hash(password, salt);
+    }
+
+    createRefreshToken(): string {
+        return randomString(REFRESH_TOKEN_LENGTH);
     }
 }

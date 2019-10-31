@@ -1,18 +1,15 @@
 import {run} from "@app/index";
-import {BadRequest, Denied, responseCreated} from "@app/application";
+import {BadRequest, Conflict, Denied, responseCreated} from "@app/application";
 import {getRepository} from "@app/model/Repository";
-import {UserEmailRepository} from "@app/model/UserEmail/UserEmailRepository";
 import {UserRepository} from "@app/model/User/UserRepository";
 import {firewallFilter} from "@app/decorator/firewall";
 import {SecurityLevels} from "@app/model/User/User";
-import {UserFactory} from "@app/model/User/UserFactory";
-import {UserEmailFactory} from "@app/model/UserEmail/UserEmailFactory";
+import {UserFactory} from "@app/service/UserFactory";
+import {UserEmailUnique} from "@app/model/User/UserEmailUnique";
 
 const action = async (req) => {
-    const emailRepository = await getRepository<UserEmailRepository>(UserEmailRepository);
     const userRepository = await getRepository<UserRepository>(UserRepository);
     const userFactory = new UserFactory();
-    const userEmailFactory = new UserEmailFactory();
 
     const model = await userFactory.createFromObject(req.body);
 
@@ -22,18 +19,18 @@ const action = async (req) => {
         throw new BadRequest(e.message);
     }
 
-    await model.hashPassword();
+    model.salt = await model.createSalt();
+    model.password = await model.hashPassword(model.password, model.salt);
 
-    const emailModel = userEmailFactory.createFromUser(model);
-
-    try {
-        await emailRepository.save(emailModel);
-    } catch (e) {
-        throw new Denied('Email already registered');
+    const emailUnique = UserEmailUnique.fromUser(model);
+    if (!await userRepository.checkUniqueEmail(emailUnique)) {
+        throw new Conflict('Email already registered');
     }
 
     try {
         const result = await userRepository.save(model);
+        await userRepository.reserveEmail(model);
+
         return responseCreated(firewallFilter(result, SecurityLevels.RESOURCE_OWNER));
     } catch (e) {
         throw new Denied('User Unique ID collision');

@@ -2,37 +2,25 @@ import {run} from "@app/index";
 import {Denied, Failed, responseCreated} from "@app/application";
 import {getRepository} from "@app/model/Repository";
 import {UserRepository} from "@app/model/User/UserRepository";
-import {UserRefreshTokenRepository} from "@app/model/UserRefreshToken/UserRefreshTokenRepository";
-import {UserRefreshTokenFactory} from "@app/model/UserRefreshToken/UserRefreshTokenFactory";
-import {UserAccessTokenFactory} from "@app/model/UserAccessToken/UserAccessTokenFactory";
-import {UserFactory} from "@app/model/User/UserFactory";
+import {AccessToken} from "@app/model/User/AccessToken";
 
-const action = async ({body: {refreshToken}}) => {
-    const tokenRepository = await getRepository<UserRefreshTokenRepository>(UserRefreshTokenRepository);
-    const refreshTokenFactory = new UserRefreshTokenFactory();
-    const token = refreshTokenFactory.createFromObject({token: refreshToken})
-
-    const savedToken = await tokenRepository.get(token);
-    if (!savedToken) {
-        console.error('Refresh token not found in database', refreshToken);
-        throw new Denied('Refresh token not found');
-    }
-
+const action = async ({body: {accessToken, refreshToken}}) => {
+    const token = AccessToken.fromString(accessToken, {ignoreExpiration: true});
     const userRepository = await getRepository<UserRepository>(UserRepository);
-    const userFactory = new UserFactory();
+    const user = await userRepository.findById(token.user);
 
-    let savedUser;
-    try {
-        savedUser = await userRepository.getConsistent(userFactory.createFromObject({id: savedToken.user}));
-    } catch(e) {
-        console.error('User with this id not found', savedToken.user);
-        throw new Failed('Unknown error');
+    if (!user.refreshTokens.has(refreshToken)) {
+        throw new Denied('Invalid refresh token');
     }
 
-    const accessTokenFactory = new UserAccessTokenFactory();
-    const accessToken = accessTokenFactory.createFromObject(savedUser);
+    user.refreshTokens.delete(refreshToken);
+    const newRefreshToken = user.createRefreshToken();
+    user.refreshTokens.add(newRefreshToken);
+
+    await userRepository.update(user);
     return responseCreated({
-        token: await accessToken.sign()
+        accessToken: await token.sign(),
+        refreshToken: newRefreshToken
     });
 };
 

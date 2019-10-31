@@ -1,5 +1,5 @@
-import {Factory} from "../Factory";
-import {User} from "./User";
+import {Factory} from "@app/model/Factory";
+import {User} from "@app/model/User/User";
 import {v4 as uuid} from "uuid";
 
 export class UserFactory implements Factory<User> {

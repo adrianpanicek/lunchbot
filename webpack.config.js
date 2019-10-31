@@ -7,8 +7,6 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const src = (subdir) => path.join(__dirname, "src", subdir);
 const appendMaps = (entries) => _.mapValues(entries, (v) => ['./source-map-install.js', v])
 
-console.log(slsw.lib);
-
 module.exports = {
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
   entry: !slsw.lib.webpack.isLocal? slsw.lib.entries : appendMaps(slsw.lib.entries),
@@ -37,7 +35,5 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    !slsw.lib.webpack.isLocal? new ForkTsCheckerWebpackPlugin() : undefined
-  ]
+  plugins: !slsw.lib.webpack.isLocal? [new ForkTsCheckerWebpackPlugin()] : undefined
 };

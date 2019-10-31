@@ -1,11 +1,18 @@
 import {Model} from "./Model";
 
 // TODO: Temp, move to other file
-import {CreateTableOptions, DataMapper, QueryIterator, QueryOptions} from "@aws/dynamodb-data-mapper";
+import {
+    CreateTableOptions,
+    DataMapper,
+    ParallelScanOptions, ParallelScanWorkerOptions,
+    QueryIterator,
+    QueryOptions, ScanIterator, ScanOptions
+} from "@aws/dynamodb-data-mapper";
 import {DynamoDB} from 'aws-sdk';
 import {ConditionExpression} from "@aws/dynamodb-expressions";
 import * as _ from "lodash";
 import {Index} from "./Index";
+import {ZeroArgumentsConstructor} from "@aws/dynamodb-data-marshaller";
 
 const {TABLE_PREFIX} = process.env;
 const mapper = new DataMapper({client: new DynamoDB, readConsistency: "strong", tableNamePrefix: TABLE_PREFIX});
@@ -66,6 +73,10 @@ export abstract class Repository<T extends Model> {
 
     find(keyCondition: {[key: string]: any}): QueryIterator<T> {
         return mapper.query(this.getModelType(), keyCondition, {});
+    }
+
+    scan(options: ScanOptions): ScanIterator<T> {
+        return mapper.scan(this.getModelType(), options);
     }
 
     findByIndex(keyCondition: Partial<T>, index: Index, options: QueryOptions = {}): QueryIterator<T> {
