@@ -18,7 +18,7 @@ export interface ResponseOptions {
     code: Number
 };
 
-const run = async (request: Request, middleware: Middleware[]): Promise<Request> => middleware[0]? await middleware[0](request, res => run(res, middleware.slice(1))) : request;
+export const run = async (request: Request, middleware: Middleware[]): Promise<Request> => middleware[0]? await middleware[0](request, res => run(res, middleware.slice(1))) : request;
 
 export const middlifyAction = (action: Action, container: Container): Middleware => async (req, next) => {
     let response = await action(req, container);
@@ -27,22 +27,6 @@ export const middlifyAction = (action: Action, container: Container): Middleware
     response.originalRequest = req;
 
     return await next(response)
-};
-
-export class Application {
-    middleware: Middleware[];
-
-    constructor() {
-        this.middleware = [];
-    }
-
-    use(middleware: Middleware) {
-        this.middleware.push(middleware);
-    };
-
-    async run(event, context, ... params) {
-        return await run(event, this.middleware);
-    };
 };
 
 export function response(data: ActionResult, opt: ResponseOptions): Response {

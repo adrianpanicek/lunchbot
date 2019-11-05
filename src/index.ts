@@ -1,4 +1,4 @@
-import {Application, middlifyAction} from './application';
+import {run as runApp, middlifyAction} from './application';
 
 import {dejsonify} from './middleware/dejsonify';
 import {jsonify} from './middleware/jsonify';
@@ -18,21 +18,21 @@ const proxyMapRequest = async (req, next) => {
 };
 
 export const run = (action) => {
-    const app = new Application;
+    const middlewares = [];
 
     // Before
-    app.use(proxyMapRequest);
-    app.use(dejsonify);
+    middlewares.push(proxyMapRequest);
+    middlewares.push(dejsonify);
 
     // After
-    app.use(jsonify);
-    app.use(catchErrors);
+    middlewares.push(jsonify);
+    middlewares.push(catchErrors);
 
     // Add action
-    app.use(middlifyAction(action, {}));
+    middlewares.push(middlifyAction(action, {}));
 
     try {
-        return async (event, context, ...params) => await app.run(event, context, ...params);
+        return async (event) => await runApp(event, middlewares);
     } catch (e) {
         console.error(e);
     }
