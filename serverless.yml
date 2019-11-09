@@ -23,6 +23,14 @@ functions:
       - schedule: cron(0 0 10 ? * MON,TUE,WED,THU,FRI *)
     environment:
       S3BUCKET: !Ref S3BucketImages
+  SlackSlashCommand:
+    handler: src/function/slackSlashCommand.handler
+    environment:
+      SLACK_SECRET: ${env:SLACK_SECRET}
+    event:
+      - http:
+          path: slashCommand
+          method: get
 
 custom:
   webpack:

@@ -15,7 +15,8 @@ export type Container = {[name: string]: any};
 export type Action = (Request, Container?) => any;
 
 export interface ResponseOptions {
-    code: Number
+    code?: Number,
+    headers?: {[key:string]: string}
 };
 
 export const run = async (request: Request, middleware: Middleware[]): Promise<Request> => middleware[0]? await middleware[0](request, res => run(res, middleware.slice(1))) : request;
