@@ -5,11 +5,9 @@ const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const src = (subdir) => path.join(__dirname, "src", subdir);
-const appendMaps = (entries) => _.mapValues(entries, (v) => ['./source-map-install.js', v])
 
 module.exports = {
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
-  entry: !slsw.lib.webpack.isLocal? slsw.lib.entries : appendMaps(slsw.lib.entries),
   devtool: 'source-map',
   externals: [nodeExternals()],
   resolve: {

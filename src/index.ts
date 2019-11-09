@@ -1,4 +1,4 @@
-import {run as runApp, middlifyAction} from './application';
+import {run as runApp, middlifyAction, Middleware} from './application';
 
 import {dejsonify} from './middleware/dejsonify';
 import {jsonify} from './middleware/jsonify';
@@ -18,7 +18,7 @@ const proxyMapRequest = async (req, next) => {
 };
 
 export const run = (action) => {
-    const middlewares = [];
+    const middlewares: Array<Middleware> = [];
 
     // Before
     middlewares.push(proxyMapRequest);

@@ -4,4 +4,4 @@ export const validateUuid = uuid => !!uuid.match(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9
 export const randomString = (length) => [...Array(length)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
 
 const _pipe = (a, b) => (arg) => b(a(arg));
-export const pipe = (...ops) => ops.reduce(_pipe)
+export const pipe = (...ops) => ops.reduce(_pipe);

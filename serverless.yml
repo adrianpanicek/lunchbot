@@ -8,21 +8,32 @@ provider:
   environment:
     REGION: ${self:provider.region}
     ENVIRONMENT: ${self:provider.stage}
-
 app: lunchbot
-tenant: adrianpanicek
+org: adrianpanicek
 
 plugins:
   - serverless-offline
   - serverless-webpack
+  - serverless-cloudside-plugin
 
-#functions:
+functions:
+  FetchClockBlock:
+    handler: src/function/fetchClockBlock.handler
+    event:
+      - schedule: cron(0 0 10 ? * MON,TUE,WED,THU,FRI *)
+    environment:
+      S3BUCKET: !Ref S3BucketImages
 
 custom:
   webpack:
     webpackConfig: 'webpack.config.js'   # Name of webpack configuration file
     includeModules: true
     packager: 'npm'
+
+resources:
+  Resources:
+    S3BucketImages:
+      Type: AWS::S3::Bucket
 
 package:
   individually: true
