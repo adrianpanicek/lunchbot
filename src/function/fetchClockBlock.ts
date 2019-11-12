@@ -4,6 +4,8 @@ import {JSDOM} from 'jsdom';
 import sharp from 'sharp';
 import AWS from 'aws-sdk';
 import {responseSuccess} from "@app/application";
+import {RestaurantKey, restaurants} from "@app/restaurants";
+import {RestaurantDay} from "@app/model/RestaurantDay";
 
 const {S3BUCKET} = process.env;
 const pageUrl = 'https://clockblock.sk/';
@@ -14,6 +16,8 @@ const extraction = {
     dayHeight: 425,
     extension: 120
 };
+
+const createFileName = (date: Date) => `ClockBlock_${date.toISOString().slice(0, 10)}.jpg`;
 
 export const handler = run(async () => {
     const fetchedPage = await fetch(pageUrl);
@@ -29,10 +33,11 @@ export const handler = run(async () => {
         .then(o => o.info);
 
     const dayOfWeek = (new Date).getDay(); // indexed from 0, where 0 is sunday
+    const day = new RestaurantDay(restaurants[RestaurantKey.CLOCK_BLOCK], new Date);
 
     await sharp(image)
         .extract({
-            top: extraction.offsetTop + (dayOfWeek - 1) * extraction.dayHeight - extraction.extension,
+            top: extraction.offsetTop + dayOfWeek * extraction.dayHeight - extraction.extension,
             left: 0,
             height: extraction.dayHeight + extraction.extension,
             width: dimensions.width
@@ -40,8 +45,9 @@ export const handler = run(async () => {
         .toBuffer()
         .then(async buffer => await s3.putObject({
             Bucket: S3BUCKET,
-            Key: `ClockBlock.jpg`,
+            Key: day.generateFileName(),
             Body: buffer,
+            ACL: "public-read"
         }).promise());
 
     return responseSuccess({});

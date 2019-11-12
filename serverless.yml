@@ -26,11 +26,12 @@ functions:
   SlackSlashCommand:
     handler: src/function/slackSlashCommand.handler
     environment:
+      S3BUCKET: !Ref S3BucketImages
       SLACK_SECRET: ${env:SLACK_SECRET}
-    event:
+    events:
       - http:
           path: slashCommand
-          method: get
+          method: ANY
 
 custom:
   webpack:
