@@ -22,7 +22,7 @@
     "@types/node-fetch": "^2.5.3",
     "@types/sharp": "^0.23.0",
     "fork-ts-checker-webpack-plugin": "^0.5.2",
-    "serverless": "^1.55.1",
+    "serverless": "^3.25.1",
     "serverless-cloudside-plugin": "^1.0.3",
     "serverless-domain-manager": "^2.6.13",
     "serverless-offline": "^5.12.0",
